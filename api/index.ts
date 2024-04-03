@@ -13,9 +13,18 @@ const commandHandler = async (
   switch (command) {
     case "välj":
       await choose(name, rest.join(" "));
-      return { response_type: "in_channel", response: ["Tackar och bockar!", "Vilket strålande val", "Låter smaskigt!", "Kul att du är med :)"][Math.floor(Math.random()*4)] };
+      return {
+        response_type: "in_channel",
+        response: [
+          "Tackar och bockar!",
+          "Vilket strålande val",
+          "Låter smaskigt!",
+          "Kul att du är med :)",
+        ][Math.floor(Math.random() * 4)],
+      };
     case "admin:starta":
-      await start();
+      const [resturangNamn, webbadress] = rest;
+      await start(resturangNamn, webbadress);
       return {
         response_type: "ephemeral",
         response: `Sådär ja, nu är det dags att beställa lunch till nästa lunch and learn!🍕
@@ -23,12 +32,42 @@ Denna vecka beställer vi från ${rest[0]} ${rest[1]}.
 Beställ genom att skriva "/frontendlunch välj {namn på rätten}" `,
       };
     case "visa":
-      const data = await show();
+      const { restaurang, personer } = await show();
+      const response = `tjabba tjena, denna veckan beställer vi från ${restaurang?.name} ${restaurang?.url}
+      ${personer
+        .map((person) => `${person.name} vill äta ${person.choose}`)
+        .join("\n")}
+      `;
       return {
         response_type: "in_channel",
-        response: data
-          .map((person) => `${person.name} vill äta ${person.choose}`)
-          .join("\n"),
+        response,
+      };
+    case "admin:beställ":
+      const { restaurang: r, personer: p } = await show();
+      console.log("p", p); //tslint:disable-line
+      const choices = p.reduce(
+        (acc, person) => {
+          if (acc[person.choose]) {
+            acc[person.choose]++;
+          } else {
+            acc[person.choose] = 1;
+          }
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+      return {
+        response_type: "in_channel",
+        response: `Måltid: Lunch
+Datum: 3/20/2024 kl 11:30
+Mat: https://www.aptit.se/nd/lev.asp?fas=&sid=1031#s_1031
+Syfte: Lunch and Learn
+KST: Senso 104
+Övrigt: ${Object.entries(choices)
+          .map(([dish, count]) => `${count}st ${dish}`)
+          .join("\n")}
+${p.map((person) => `användare: ${person.name} Företag: Senso`).join("\n")}
+Antal: ${p.length}`,
       };
     default:
       return {
