@@ -7,12 +7,14 @@ app.use(express.urlencoded());
 // create a RESTful-style API handler
 const commandHandler = async (
   command: string,
-  name: string,
+  namn: string,
+  kanalid: string,
+  kanalnamn: string,
   rest: string[],
 ) => {
   switch (command) {
     case "välj":
-      await choose(name, rest.join(" "));
+      await choose(namn, rest.join(" "), kanalid);
       return {
         response_type: "in_channel",
         response: [
@@ -24,18 +26,18 @@ const commandHandler = async (
       };
     case "admin:starta":
       const [resturangNamn, webbadress] = rest;
-      await start(resturangNamn, webbadress);
+      await start(resturangNamn, webbadress, kanalid, kanalnamn);
       return {
         response_type: "ephemeral",
-        response: `Sådär ja, nu är det dags att beställa lunch till nästa lunch and learn!🍕
+        response: `Sådär ja, nu är det dags att beställa lunch till nästa lunch and learn!ð
 Denna vecka beställer vi från ${rest[0]} ${rest[1]}.
 Beställ genom att skriva "/frontendlunch välj {namn på rätten}" `,
       };
     case "visa":
       const { restaurang, personer } = await show();
-      const response = `tjabba tjena, denna veckan beställer vi från ${restaurang?.name} ${restaurang?.url}
+      const response = `tjabba tjena, denna veckan beställer vi från ${restaurang?.restaurangnamn} ${restaurang?.webbadress}
       ${personer
-        .map((person) => `${person.name} vill äta ${person.choose}`)
+        .map((person) => `${person.namn} vill äta ${person.val}`)
         .join("\n")}
       `;
       return {
@@ -47,10 +49,10 @@ Beställ genom att skriva "/frontendlunch välj {namn på rätten}" `,
       console.log("p", p); //tslint:disable-line
       const choices = p.reduce(
         (acc, person) => {
-          if (acc[person.choose]) {
-            acc[person.choose]++;
+          if (acc[person.val]) {
+            acc[person.val]++;
           } else {
-            acc[person.choose] = 1;
+            acc[person.val] = 1;
           }
           return acc;
         },
@@ -63,24 +65,33 @@ Datum: 3/20/2024 kl 11:30
 Mat: https://www.aptit.se/nd/lev.asp?fas=&sid=1031#s_1031
 Syfte: Lunch and Learn
 KST: Senso 104
-Övrigt: ${Object.entries(choices)
+Ãvrigt: ${Object.entries(choices)
           .map(([dish, count]) => `${count}st ${dish}`)
           .join("\n")}
-${p.map((person) => `användare: ${person.name} Företag: Senso`).join("\n")}
+${p.map((person) => `användare: ${person.namn} Företag: Senso`).join("\n")}
 Antal: ${p.length}`,
       };
     default:
       return {
         response_type: "in_channel",
-        response: "Okänt kommando, använd 'välj {din maträtt}' eller 'visa'",
+        response: "Okänt kommando, använd 'välj {din matätt}' eller 'visa'",
       };
   }
 };
 
 app.post("/api", async (req, res) => {
-  const name = req.body.user_name as string;
+  const kanalid = req.body.channel_id as string;
+  const kanalnamn = req.body.channel_name as string;
+  const namn = req.body.user_name as string;
+  console.log(kanalid, kanalnamn);
   const [command, ...rest] = req.body.text.split(" ");
-  const { response, response_type } = await commandHandler(command, name, rest);
+  const { response, response_type } = await commandHandler(
+    command,
+    namn,
+    kanalid,
+    kanalnamn,
+    rest,
+  );
 
   res.send({
     response_type,
@@ -89,5 +100,5 @@ app.post("/api", async (req, res) => {
   console.log("response", response); //tslint:disable-line
 });
 app.listen(1337, () =>
-  console.log("🚀 Server ready at: http://localhost:1337"),
+  console.log("ð Server ready at: http://localhost:1337"),
 );

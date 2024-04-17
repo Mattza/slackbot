@@ -1,30 +1,41 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
-export const choose = (name: string, choose: string) => {
+export const choose = (namn: string, val: string, kanalid: string) => {
   return prisma.person.upsert({
     where: {
-      name,
+      testasd: { namn, kanalid },
     },
     update: {
-      choose,
+      val,
     },
     create: {
-      choose,
-      name,
+      val,
+      namn,
+      kanalid,
     },
   });
 };
 
-export const start = async (resturangNamn: string, webbadress: string) => {
-  await prisma.restaurang.deleteMany();
-  await prisma.restaurang.create({
-    data: { name: resturangNamn, url: webbadress },
+export const start = async (
+  restaurangnamn: string,
+  webbadress: string,
+  kanalid: string,
+  kanalnamn: string,
+) => {
+  await prisma.bestaellning.deleteMany();
+  await prisma.bestaellning.create({
+    data: {
+      restaurangnamn,
+      webbadress,
+      kanalid,
+      kanalnamn,
+    },
   });
   return prisma.person.deleteMany();
 };
 
 export const show = async () => {
-  const restaurang = await prisma.restaurang.findFirst();
+  const restaurang = await prisma.bestaellning.findFirst();
   const personer = await prisma.person.findMany();
   return {
     restaurang,

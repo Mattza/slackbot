@@ -9,11 +9,18 @@ generator client {
 }
 
 model Person {
-    name   String @id() @default(cuid())
-    choose String
+    namn         String
+    val          String
+    kanalid      String
+    bestaellning Bestaellning @relation(references: [kanalid], fields: [kanalid])
+
+    @@id(name: "testasd", [namn, kanalid])
 }
 
-model Restaurang {
-    name String @id() @default(cuid())
-    url  String
+model Bestaellning {
+    kanalid        String   @id()
+    restaurangnamn String
+    webbadress     String
+    kanalnamn      String
+    personer       Person[]
 }
