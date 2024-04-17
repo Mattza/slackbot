@@ -13,6 +13,16 @@ const commandHandler = async (
   rest: string[],
 ) => {
   switch (command) {
+    case 'hjälp':
+      return {
+        response: [
+          'Möjliga commands är: ',
+          'välj [namn på rätt]',
+          'admin:starta [restaurangnamn] [URL]',
+          'visa',
+          'admin:beställ'
+        ]
+      }
     case "välj":
       await choose(namn, rest.join(" "), kanalid);
       return {

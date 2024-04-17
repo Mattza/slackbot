@@ -22,7 +22,19 @@ export const start = async (
   kanalid: string,
   kanalnamn: string,
 ) => {
-  await prisma.bestaellning.deleteMany();
+  await prisma.person.deleteMany({
+    where: {
+      kanalid
+    }
+  });
+  await prisma.bestaellning.deleteMany({
+
+    where: {
+      kanalid: {
+        equals: kanalid,
+      }
+    }
+  });
   await prisma.bestaellning.create({
     data: {
       restaurangnamn,
@@ -31,7 +43,6 @@ export const start = async (
       kanalnamn,
     },
   });
-  return prisma.person.deleteMany();
 };
 
 export const show = async () => {
