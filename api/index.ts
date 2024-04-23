@@ -10,19 +10,19 @@ const commandHandler = async (
   namn: string,
   kanalid: string,
   kanalnamn: string,
-  rest: string[],
+  rest: string[]
 ) => {
   switch (command) {
-    case 'hjälp':
+    case "hjälpa":
       return {
         response: [
-          'Möjliga commands är: ',
-          'välj [namn på rätt]',
-          'admin:starta [restaurangnamn] [URL]',
-          'visa',
-          'admin:beställ'
-        ]
-      }
+          "Möjliga commands är: ",
+          "välj [namn på rätt]",
+          "admin:starta [restaurangnamn] [URL]",
+          "visa",
+          "admin:beställ",
+        ],
+      };
     case "välj":
       await choose(namn, rest.join(" "), kanalid);
       return {
@@ -66,12 +66,14 @@ Beställ genom att skriva "/frontendlunch välj {namn på rätten}" `,
           }
           return acc;
         },
-        {} as Record<string, number>,
+        {} as Record<string, number>
       );
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
       return {
         response_type: "in_channel",
         response: `Måltid: Lunch
-Datum: 3/20/2024 kl 11:30
+Datum: ${tomorrow.toLocaleDateString()} kl 11:45
 Mat: https://www.aptit.se/nd/lev.asp?fas=&sid=1031#s_1031
 Syfte: Lunch and Learn
 KST: Senso 104
@@ -100,7 +102,7 @@ app.post("/api", async (req, res) => {
     namn,
     kanalid,
     kanalnamn,
-    rest,
+    rest
   );
 
   res.send({
@@ -109,6 +111,4 @@ app.post("/api", async (req, res) => {
   });
   console.log("response", response); //tslint:disable-line
 });
-app.listen(1337, () =>
-  console.log("ð Server ready at: http://localhost:1337"),
-);
+app.listen(1337, () => console.log("ð Server ready at: http://localhost:1337"));
